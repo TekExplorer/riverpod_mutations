@@ -1,8 +1,9 @@
-/// Support for doing something awesome.
+/// A Library that provides a way to handle mutations with riverpod
 ///
-/// More dartdocs go here.
+/// This is temporary until riverpod directly supports mutations
+///
+/// Keep an eye on this issue: https://github.com/rrousselGit/riverpod/issues/1660
 library riverpod_mutations;
 
-export 'src/riverpod_mutations_base.dart';
-
-// TODO: Export any libraries intended for clients of this package.
+export 'src/generic_mutation_provider.dart';
+export 'src/mutation_state.dart';
