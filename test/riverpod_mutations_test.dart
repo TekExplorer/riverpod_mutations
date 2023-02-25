@@ -31,6 +31,7 @@ void main() {
     tearDown(() {
       _subscription.close();
     });
+
     test('Custom mutation with parameter', () async {
       var exampleMutation = container.read(provider);
       expect(exampleMutation, isA<MutationInitial>());
@@ -118,7 +119,7 @@ void main() {
       expect(
         exampleMutation.error,
         isA<FormatException>(),
-        reason: 'Mutation error is not correct',
+        reason: 'Mutation error should be a FormatException',
       );
 
       // mutation value should still be there
