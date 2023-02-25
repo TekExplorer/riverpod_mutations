@@ -25,26 +25,26 @@ abstract class MutationState<Result, Param> {
       MutationState<Result, Param>._initial(ref, fn);
 
   const factory MutationState._initial(
-    ProviderRef<MutationState<Result, Param>> _ref,
-    FutureOr<Result> Function(Param p) _fn,
+    ProviderRef<MutationState<Result, Param>> ref,
+    FutureOr<Result> Function(Param p) fn,
   ) = MutationInitial<Result, Param>._;
 
   const factory MutationState._error(
-    ProviderRef<MutationState<Result, Param>> _ref,
-    FutureOr<Result> Function(Param p) _fn,
+    ProviderRef<MutationState<Result, Param>> ref,
+    FutureOr<Result> Function(Param p) fn,
     Object error, {
     required StackTrace stackTrace,
   }) = MutationError<Result, Param>._;
 
   const factory MutationState._data(
-    ProviderRef<MutationState<Result, Param>> _ref,
-    FutureOr<Result> Function(Param p) _fn,
+    ProviderRef<MutationState<Result, Param>> ref,
+    FutureOr<Result> Function(Param p) fn,
     Result value,
   ) = MutationData<Result, Param>._;
 
   const factory MutationState._loading(
-    ProviderRef<MutationState<Result, Param>> _ref,
-    FutureOr<Result> Function(Param p) _fn,
+    ProviderRef<MutationState<Result, Param>> ref,
+    FutureOr<Result> Function(Param p) fn,
   ) = MutationLoading<Result, Param>._;
 
   static Future<MutationState<Result, P>> _guard<Result, P>(
