@@ -6,7 +6,7 @@ part of 'riverpod_mutations_example.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$todosNotifierHash() => r'b64882862a13b933c197320fab66244e2368856b';
+String _$todosNotifierHash() => r'aa94d12eb52013a3c5b8ab8ac90bcad91c157b86';
 
 /// See also [TodosNotifier].
 @ProviderFor(TodosNotifier)

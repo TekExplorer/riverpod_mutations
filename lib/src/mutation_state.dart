@@ -9,92 +9,99 @@ import 'package:stack_trace/stack_trace.dart';
 /// T is the type of the created data from the call (equivalent to AsyncValue's T)
 /// (the type of the `value`)
 @immutable
-abstract class MutationState<T, Param> {
+abstract class MutationState<Result, Param> {
   const MutationState._(this._ref, this._fn);
 
-  const factory MutationState._initial(
-    ProviderRef<MutationState<T, Param>> _ref,
-    Future<T> Function(Param p) _fn,
-  ) = MutationInitial<T, Param>._;
-
+  /// Use to initialize your own mutation provider
+  ///
+  /// [ref] is the provider reference
+  ///
+  /// [fn] is the function that will be called when the mutation is called
+  /// with the parameter passed in by the front end
   factory MutationState.create(
-    ProviderRef<MutationState<T, Param>> _ref,
-    Future<T> Function(Param p) _fn,
-  ) {
-    return MutationState<T, Param>._initial(_ref, _fn);
-  }
+    ProviderRef<MutationState<Result, Param>> ref,
+    FutureOr<Result> Function(Param p) fn,
+  ) =>
+      MutationState<Result, Param>._initial(ref, fn);
+
+  const factory MutationState._initial(
+    ProviderRef<MutationState<Result, Param>> _ref,
+    FutureOr<Result> Function(Param p) _fn,
+  ) = MutationInitial<Result, Param>._;
 
   const factory MutationState._error(
-    ProviderRef<MutationState<T, Param>> _ref,
-    Future<T> Function(Param p) _fn,
+    ProviderRef<MutationState<Result, Param>> _ref,
+    FutureOr<Result> Function(Param p) _fn,
     Object error, {
     required StackTrace stackTrace,
-  }) = MutationError<T, Param>._;
+  }) = MutationError<Result, Param>._;
 
   const factory MutationState._data(
-    ProviderRef<MutationState<T, Param>> _ref,
-    Future<T> Function(Param p) _fn,
-    T value,
-  ) = MutationData<T, Param>._;
+    ProviderRef<MutationState<Result, Param>> _ref,
+    FutureOr<Result> Function(Param p) _fn,
+    Result value,
+  ) = MutationData<Result, Param>._;
 
   const factory MutationState._loading(
-    ProviderRef<MutationState<T, Param>> _ref,
-    Future<T> Function(Param p) _fn,
-  ) = MutationLoading<T, Param>._;
+    ProviderRef<MutationState<Result, Param>> _ref,
+    FutureOr<Result> Function(Param p) _fn,
+  ) = MutationLoading<Result, Param>._;
 
-  static Future<MutationState<T, P>> _guard<T, P>(
-    ProviderRef<MutationState<T, P>> ref,
-    Future<T> Function(P p) cb,
+  static Future<MutationState<Result, P>> _guard<Result, P>(
+    ProviderRef<MutationState<Result, P>> ref,
+    FutureOr<Result> Function(P p) cb,
     P parameter,
   ) async {
     try {
-      return MutationState<T, P>._data(ref, cb, await cb(parameter));
+      return MutationState<Result, P>._data(ref, cb, await cb(parameter));
     } catch (e, s) {
-      return MutationState<T, P>._error(ref, cb, e, stackTrace: s);
+      return MutationState<Result, P>._error(ref, cb, e, stackTrace: s);
     }
   }
 
-  final ProviderRef<MutationState<T, Param>> _ref;
+  final ProviderRef<MutationState<Result, Param>> _ref;
   bool get isLoading;
   bool get hasValue;
-  T? get value;
+  Result? get value;
   Object? get error;
   StackTrace? get stackTrace;
-  final Future<T> Function(Param p) _fn;
+  final FutureOr<Result> Function(Param p) _fn;
 
-  void _setState(MutationState<T, Param> state) {
+  void _setState(MutationState<Result, Param> state) {
     _ref.state = state.copyWithPrevious(_ref.state);
   }
 
-  Future<MutationState<T, Param>> call(Param parameter) async {
+  Future<MutationState<Result, Param>> call(Param parameter) async {
     final cb = this._fn;
-    _setState(MutationState<T, Param>._loading(_ref, cb));
-    final result = await MutationState._guard<T, Param>(_ref, cb, parameter);
+    _setState(MutationState<Result, Param>._loading(_ref, cb));
+    final result =
+        await MutationState._guard<Result, Param>(_ref, cb, parameter);
     _setState(result);
     return result;
   }
 
   R map<R>({
-    required R Function(MutationInitial<T, Param> initial) initial,
-    required R Function(MutationData<T, Param> data) data,
-    required R Function(MutationError<T, Param> error) error,
-    required R Function(MutationLoading<T, Param> loading) loading,
+    required R Function(MutationInitial<Result, Param> initial) initial,
+    required R Function(MutationData<Result, Param> data) data,
+    required R Function(MutationError<Result, Param> error) error,
+    required R Function(MutationLoading<Result, Param> loading) loading,
   });
 
-  MutationState<T, Param> copyWithPrevious(MutationState<T, Param> previous);
+  MutationState<Result, Param> copyWithPrevious(
+      MutationState<Result, Param> previous);
 
-  MutationState<T, Param> unwrapPrevious() {
+  MutationState<Result, Param> unwrapPrevious() {
     return map(
-      initial: (i) => MutationInitial<T, Param>._(_ref, _fn),
+      initial: (i) => MutationInitial<Result, Param>._(_ref, _fn),
       data: (d) {
-        if (d.isLoading) return MutationLoading<T, Param>._(_ref, _fn);
+        if (d.isLoading) return MutationLoading<Result, Param>._(_ref, _fn);
         return MutationData._(_ref, _fn, d.value!);
       },
       error: (e) {
         if (e.isLoading) return MutationLoading._(_ref, _fn);
         return MutationError._(_ref, _fn, e.error, stackTrace: e.stackTrace);
       },
-      loading: (l) => MutationLoading<T, Param>._(_ref, _fn),
+      loading: (l) => MutationLoading<Result, Param>._(_ref, _fn),
     );
   }
 
@@ -115,7 +122,7 @@ abstract class MutationState<T, Param> {
   @override
   bool operator ==(Object other) {
     return runtimeType == other.runtimeType &&
-        other is MutationState<T, Param> &&
+        other is MutationState<Result, Param> &&
         other.isInitial == isInitial &&
         other.isLoading == isLoading &&
         other.hasValue == hasValue &&
@@ -136,11 +143,11 @@ abstract class MutationState<T, Param> {
       );
 }
 
-class MutationInitial<T, F> extends MutationState<T, F> {
+class MutationInitial<Result, Param> extends MutationState<Result, Param> {
   const MutationInitial._(super._ref, super._fn) : super._();
 
   @override
-  T? get value => null;
+  Result? get value => null;
 
   @override
   bool get hasValue => false;
@@ -156,21 +163,22 @@ class MutationInitial<T, F> extends MutationState<T, F> {
 
   @override
   R map<R>(
-      {required R Function(MutationInitial<T, F> initial) initial,
-      required R Function(MutationData<T, F> data) data,
-      required R Function(MutationError<T, F> error) error,
-      required R Function(MutationLoading<T, F> loading) loading}) {
+      {required R Function(MutationInitial<Result, Param> initial) initial,
+      required R Function(MutationData<Result, Param> data) data,
+      required R Function(MutationError<Result, Param> error) error,
+      required R Function(MutationLoading<Result, Param> loading) loading}) {
     return initial(this);
   }
 
   @override
-  MutationState<T, F> copyWithPrevious(MutationState<T, F> previous) {
+  MutationState<Result, Param> copyWithPrevious(
+      MutationState<Result, Param> previous) {
     // We shouldn't even have a previous value if we are initial
     return this;
   }
 }
 
-class MutationLoading<T, F> extends MutationState<T, F> {
+class MutationLoading<Result, Param> extends MutationState<Result, Param> {
   const MutationLoading._(super._ref, super._fn)
       : hasValue = false,
         value = null,
@@ -194,7 +202,7 @@ class MutationLoading<T, F> extends MutationState<T, F> {
   final bool hasValue;
 
   @override
-  final T? value;
+  final Result? value;
 
   @override
   final Object? error;
@@ -204,17 +212,17 @@ class MutationLoading<T, F> extends MutationState<T, F> {
 
   @override
   R map<R>({
-    required R Function(MutationInitial<T, F> initial) initial,
-    required R Function(MutationData<T, F> data) data,
-    required R Function(MutationError<T, F> error) error,
-    required R Function(MutationLoading<T, F> loading) loading,
+    required R Function(MutationInitial<Result, Param> initial) initial,
+    required R Function(MutationData<Result, Param> data) data,
+    required R Function(MutationError<Result, Param> error) error,
+    required R Function(MutationLoading<Result, Param> loading) loading,
   }) {
     return loading(this);
   }
 
   @override
-  MutationState<T, F> copyWithPrevious(
-    MutationState<T, F> previous, {
+  MutationState<Result, Param> copyWithPrevious(
+    MutationState<Result, Param> previous, {
     bool isRefresh = true,
   }) {
     if (isRefresh) {
@@ -264,7 +272,7 @@ class MutationLoading<T, F> extends MutationState<T, F> {
   }
 }
 
-class MutationData<T, F> extends MutationState<T, F> {
+class MutationData<Result, Param> extends MutationState<Result, Param> {
   const MutationData._(super._ref, super._fn, this.value)
       : isLoading = false,
         error = null,
@@ -281,7 +289,7 @@ class MutationData<T, F> extends MutationState<T, F> {
   }) : super._();
 
   @override
-  final T value;
+  final Result value;
 
   @override
   bool get hasValue => true;
@@ -297,26 +305,28 @@ class MutationData<T, F> extends MutationState<T, F> {
 
   @override
   R map<R>({
-    required R Function(MutationInitial<T, F> initial) initial,
-    required R Function(MutationData<T, F> data) data,
-    required R Function(MutationError<T, F> error) error,
-    required R Function(MutationLoading<T, F> loading) loading,
+    required R Function(MutationInitial<Result, Param> initial) initial,
+    required R Function(MutationData<Result, Param> data) data,
+    required R Function(MutationError<Result, Param> error) error,
+    required R Function(MutationLoading<Result, Param> loading) loading,
   }) {
     return data(this);
   }
 
   @override
-  MutationState<T, F> copyWithPrevious(MutationState<T, F> previous) => this;
+  MutationState<Result, Param> copyWithPrevious(
+          MutationState<Result, Param> previous) =>
+      this;
 }
 
-class MutationError<T, F> extends MutationState<T, F> {
+class MutationError<Result, Param> extends MutationState<Result, Param> {
   const MutationError.__(
     super._ref,
     super._fn,
     this.error, {
     required this.stackTrace,
     required this.isLoading,
-    required T? value,
+    required Result? value,
     required this.hasValue,
   })  : _value = value,
         super._();
@@ -335,14 +345,14 @@ class MutationError<T, F> extends MutationState<T, F> {
   final bool hasValue;
 
   @override
-  T? get value {
+  Result? get value {
     if (!hasValue) {
       throwErrorWithCombinedStackTrace(error, stackTrace);
     }
     return _value;
   }
 
-  final T? _value;
+  final Result? _value;
 
   @override
   final Object error;
@@ -351,16 +361,17 @@ class MutationError<T, F> extends MutationState<T, F> {
 
   @override
   R map<R>({
-    required R Function(MutationInitial<T, F> initial) initial,
-    required R Function(MutationData<T, F> data) data,
-    required R Function(MutationError<T, F> error) error,
-    required R Function(MutationLoading<T, F> loading) loading,
+    required R Function(MutationInitial<Result, Param> initial) initial,
+    required R Function(MutationData<Result, Param> data) data,
+    required R Function(MutationError<Result, Param> error) error,
+    required R Function(MutationLoading<Result, Param> loading) loading,
   }) {
     return error(this);
   }
 
   @override
-  MutationState<T, F> copyWithPrevious(MutationState<T, F> previous) {
+  MutationState<Result, Param> copyWithPrevious(
+      MutationState<Result, Param> previous) {
     return MutationError.__(
       _ref,
       _fn,
@@ -373,10 +384,10 @@ class MutationError<T, F> extends MutationState<T, F> {
   }
 }
 
-extension MutationValueX<T, F> on MutationState<T, F> {
+extension MutationValueX<Result, Param> on MutationState<Result, Param> {
   bool get isInitial => this is MutationInitial;
-  T get requireValue {
-    if (hasValue) return value as T;
+  Result get requireValue {
+    if (hasValue) return value as Result;
     if (hasError) throwErrorWithCombinedStackTrace(error!, stackTrace!);
     throw StateError(
       'Tried to call `requireValue` on a `MutationValue`'
@@ -384,22 +395,23 @@ extension MutationValueX<T, F> on MutationState<T, F> {
     );
   }
 
-  T? get valueOrNull => hasValue ? value : null;
+  Result? get valueOrNull => hasValue ? value : null;
+
   bool get isRerunning =>
       isLoading && (hasValue || hasError) && this is! MutationLoading;
 
   bool get hasError => error != null;
-  MutationData<T, F>? get asData =>
+  MutationData<Result, Param>? get asData =>
       maybeMap(data: (d) => d, orElse: () => null);
 
-  MutationError<T, F>? get asError =>
+  MutationError<Result, Param>? get asError =>
       maybeMap(error: (e) => e, orElse: () => null);
 
   R maybeWhen<R>({
     bool skipLoadingOnRerun = false,
     bool skipError = false,
     R Function()? initial,
-    R Function(T value)? data,
+    R Function(Result value)? data,
     R Function(Object error, StackTrace stackTrace)? error,
     R Function()? loading,
     required R Function() orElse,
@@ -424,7 +436,7 @@ extension MutationValueX<T, F> on MutationState<T, F> {
     bool skipLoadingOnRerun = false,
     bool skipError = false,
     required R Function() initial,
-    required R Function(T data) data,
+    required R Function(Result data) data,
     required R Function(Object error, StackTrace stackTrace) error,
     required R Function() loading,
   }) {
@@ -453,7 +465,7 @@ extension MutationValueX<T, F> on MutationState<T, F> {
     bool skipLoadingOnRerun = false,
     bool skipError = false,
     R? Function()? initial,
-    R? Function(T data)? data,
+    R? Function(Result data)? data,
     R? Function(Object error, StackTrace stackTrace)? error,
     R? Function()? loading,
   }) {
@@ -468,10 +480,10 @@ extension MutationValueX<T, F> on MutationState<T, F> {
   }
 
   R maybeMap<R>({
-    R Function(MutationInitial<T, F> initial)? initial,
-    R Function(MutationData<T, F> data)? data,
-    R Function(MutationError<T, F> error)? error,
-    R Function(MutationLoading<T, F> loading)? loading,
+    R Function(MutationInitial<Result, Param> initial)? initial,
+    R Function(MutationData<Result, Param> data)? data,
+    R Function(MutationError<Result, Param> error)? error,
+    R Function(MutationLoading<Result, Param> loading)? loading,
     required R Function() orElse,
   }) {
     return map(
