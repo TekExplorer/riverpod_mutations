@@ -15,8 +15,6 @@ A simple package to implement mutations for riverpod
 - Intended to be a stop-gap measure intended to be replaced by official riverpod mutations, once they are implemented.
 - Intended to be hopefully api-compatible with riverpod mutations once they are implemented.
 
-# TODO
-
 ## Features
 
 Simply and intuitively handle the state of any async function
