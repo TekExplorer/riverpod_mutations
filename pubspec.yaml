@@ -1,5 +1,5 @@
 name: riverpod_mutations
-description: A stop-gap measure for riverpod mutations, until its supported
+description: A stop-gap measure for riverpod mutations, until its officially supported
 version: 1.0.0
 repository: https://github.com/TekExplorer/riverpod_mutations
 

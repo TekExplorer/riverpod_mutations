@@ -11,8 +11,11 @@ and the Flutter guide for
 [developing packages and plugins](https://flutter.dev/developing-packages). 
 -->
 
-TODO: Put a short description of the package here that helps potential users
-know whether this package might be useful for them.
+A simple package to implement mutations for riverpod
+- Intended to be a stop-gap measure intended to be replaced by official riverpod mutations, once they are implemented.
+- Intended to be hopefully api-compatible with riverpod mutations once they are implemented.
+
+# TODO
 
 ## Features
 
@@ -24,6 +27,7 @@ TODO: List prerequisites and provide or point to information on how to
 start using the package.
 
 ## Usage
+// SEE EXAMPLE
 
 TODO: Include short and useful examples for package users. Add longer examples
 to `/example` folder. 
