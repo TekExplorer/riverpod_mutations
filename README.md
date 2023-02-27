@@ -19,25 +19,54 @@ A simple package to implement mutations for riverpod
 
 ## Features
 
-TODO: List what your package can do. Maybe include images, gifs, or videos.
+Simply and intuitively handle the state of any async function
 
 ## Getting started
 
-TODO: List prerequisites and provide or point to information on how to
-start using the package.
+```yaml
+dependencies:
+  riverpod_mutations: ^1.0.0
+  # or flutter_riverpod or hooks_riverpod
+  riverpod: ^2.2.0
+  # For generator
+  riverpod_annotation: ^1.2.1
 
-## Usage
-// SEE EXAMPLE
-
-TODO: Include short and useful examples for package users. Add longer examples
-to `/example` folder. 
-
-```dart
-const like = 'sample';
+# Generator
+dev_dependencies:
+  riverpod_generator: ^1.2.0
+  build_runner: ^2.3.3
 ```
 
-## Additional information
+## Usage
+
+```dart
+import 'package:riverpod/riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:riverpod_mutations/riverpod_mutations.dart';
+
+part 'riverpod_mutations_example.g.dart';
+
+@riverpod
+MutationState<double, String> stringToDouble(StringToDoubleRef ref) {
+  // user passes in a String
+  // the string gets parsed.
+  // if successful, you get a MutationData
+  // if failed (invalid input) you get a MutationError
+  return MutationState.create(ref, (something) async {
+    await Future.delayed(Duration(seconds: 1));
+    print('Got $something');
+    return double.parse(something);
+  });
+}
+
+example(ref) {
+  final stringToDouble = ref.watch(stringToDoubleProvider);
+  stringToDouble('4.7');
+}
+```
+
+<!-- ## Additional information
 
 TODO: Tell users more about the package: where to find more information, how to 
 contribute to the package, how to file issues, what response they can expect 
-from the package authors, and more.
+from the package authors, and more. -->
