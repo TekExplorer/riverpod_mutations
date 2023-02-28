@@ -19,22 +19,14 @@ void main() {
 
   group('Custom Mutation Tests', () {
     late AutoDisposeProvider<MutationState<double, String>> provider;
-    // ignore: no_leading_underscores_for_local_identifiers
-    late ProviderSubscription _subscription;
-
     setUp(() {
-      provider = stringToNumProvider;
-      // keep it alive for the tests
-      _subscription = container.listen(provider, (previous, next) {});
-    });
-
-    tearDown(() {
-      _subscription.close();
+      provider = stringToDoubleProvider;
+      container.listen(provider, (p, n) {});
     });
 
     test('Custom mutation with parameter', () async {
       var exampleMutation = container.read(provider);
-      expect(exampleMutation, isA<MutationInitial>());
+      expect(exampleMutation, isA<MutationInitial<double, String>>());
 
       // final expectedException = Exception('Mutation failed');
       final mutationFuture = exampleMutation('1');
@@ -43,7 +35,7 @@ void main() {
 
       expect(
         exampleMutation,
-        isA<MutationLoading>(),
+        isA<MutationLoading<double, String>>(),
         reason: 'Mutation is not loading',
       );
 
@@ -57,7 +49,6 @@ void main() {
         reason: 'Mutation did not succeed',
       );
 
-      exampleMutation is MutationData;
       expect(
         exampleMutation.valueOrNull,
         isNotNull,
@@ -73,7 +64,7 @@ void main() {
       // lets give it another go, this time it will fail. same provider.
       exampleMutation = container.read(provider);
 
-      expect(exampleMutation, isA<MutationData>());
+      expect(exampleMutation, isA<MutationData<double, String>>());
 
       final mutationFuture2 = exampleMutation('Invalid input');
 
@@ -108,8 +99,6 @@ void main() {
         reason: 'Mutation did not fail',
       );
 
-      exampleMutation is MutationError;
-
       expect(
         exampleMutation.error,
         isNotNull,
@@ -133,24 +122,20 @@ void main() {
 
   group('Mutation Tests', () {
     late GenericMutationProvider provider;
-    // ignore: no_leading_underscores_for_local_identifiers
-    late ProviderSubscription _subscription;
-
     setUp(() {
-      provider = genericMutationProvider('exampleKey');
-      // keep it alive for the tests
-      _subscription = container.listen(provider, (previous, next) {});
+      provider = genericMutationProvider('mutationKey');
+      container.listen(provider, (p, n) {});
     });
 
     tearDown(() {
-      _subscription.close();
+      container.invalidate(provider);
     });
 
     test('Mutation is initial', () {
-      var exampleMutation = container.read(provider);
+      final exampleMutation = container.read(provider);
       expect(
         exampleMutation,
-        isA<MutationInitial>(),
+        isA<MutationInitial<void, Future<void> Function()>>(),
         reason: 'Mutation is not initial',
       );
       expect(
@@ -165,41 +150,48 @@ void main() {
 
     test('Mutation succeeds', () async {
       var exampleMutation = container.read(provider);
-      expect(exampleMutation, isA<MutationInitial>());
+      expect(
+        exampleMutation,
+        isA<MutationInitial<void, Future<void> Function()>>(),
+      );
 
-      final completer = Completer();
-      exampleMutation.call(() async {
-        await Future.delayed(Duration(microseconds: 10));
-        completer.complete();
+      final completer = Completer<void>();
+      final f = exampleMutation(() async {
+        await Future<void>.delayed(const Duration(microseconds: 100));
+        return completer.future;
       });
 
       exampleMutation = container.read(provider);
       expect(
         exampleMutation,
-        isA<MutationLoading>(),
+        isA<MutationLoading<void, Future<void> Function()>>(),
         reason: 'Mutation is not loading',
       );
 
-      await completer.future;
+      completer.complete();
+      await f;
 
       exampleMutation = container.read(provider);
       expect(
         exampleMutation,
-        isA<MutationData>(),
+        isA<MutationData<void, Future<void> Function()>>(),
         reason: 'Mutation has not succeeded',
       );
     });
 
     test('Mutation fails', () async {
       var exampleMutation = container.read(provider);
-      expect(exampleMutation, isA<MutationInitial>());
+      expect(
+        exampleMutation,
+        isA<MutationInitial<void, Future<void> Function()>>(),
+      );
 
       final expectedException = Exception('Mutation failed');
 
-      final completer = Completer();
-      exampleMutation.call(() async {
-        await Future.delayed(Duration(microseconds: 10));
-        completer.complete();
+      final completer = Completer<void>();
+      final f = exampleMutation.call(() async {
+        await Future<void>.delayed(const Duration(microseconds: 10));
+        await completer.future;
         throw expectedException;
       });
 
@@ -207,19 +199,20 @@ void main() {
 
       expect(
         exampleMutation,
-        isA<MutationLoading>(),
+        isA<MutationLoading<void, Future<void> Function()>>(),
         reason: 'Mutation is not loading',
       );
 
-      await completer.future;
+      completer.complete();
+      await f;
 
       exampleMutation = container.read(provider);
       expect(
         exampleMutation,
-        isA<MutationError>(),
+        isA<MutationError<void, Future<void> Function()>>(),
         reason: 'Mutation did not fail',
       );
-      exampleMutation is MutationError;
+
       expect(
         exampleMutation.error,
         expectedException,
