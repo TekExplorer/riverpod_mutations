@@ -14,5 +14,5 @@ part 'generic_mutation_provider.g.dart';
 MutationState<void, Future<void> Function()> genericMutation(
     GenericMutationRef ref, Object mutationKey) {
   // simply calls the function provided by the user
-  return MutationState.create(ref, (fn) => fn());
+  return MutationState.fromRef(ref, (fn) => fn());
 }

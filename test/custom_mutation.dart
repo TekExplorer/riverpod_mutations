@@ -5,5 +5,5 @@ part 'custom_mutation.g.dart';
 
 @riverpod
 MutationState<double, String> stringToDouble(StringToDoubleRef ref) {
-  return MutationState.create(ref, double.parse);
+  return MutationState.fromRef(ref, double.parse);
 }

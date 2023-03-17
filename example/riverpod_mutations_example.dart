@@ -89,7 +89,7 @@ MutationState<void, Todo> addTodo(AddTodoRef ref) {
   // user passes in a `Todo`
   // addTodo is called, with error handling by this provider
   // could use a tearoff
-  return MutationState.create(ref, (todo) async {
+  return MutationState.create((newState) => ref.state = newState, (todo) async {
     return await ref.read(todosNotifierProvider.notifier).addTodo(todo);
   });
 }
