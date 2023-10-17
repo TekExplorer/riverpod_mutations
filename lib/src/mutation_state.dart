@@ -12,7 +12,7 @@ typedef StateSetter<Result, Param> = void Function(
 /// T is the type of the created data from the call (equivalent to AsyncValue's T)
 /// (the type of the `value`)
 @immutable
-abstract class MutationState<Result, Param> {
+sealed class MutationState<Result, Param> {
   const MutationState(this._setState, this._fn);
 
   factory MutationState.fromRef(

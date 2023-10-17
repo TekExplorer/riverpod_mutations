@@ -6,7 +6,7 @@ part of 'riverpod_mutations_example.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$addTodoHash() => r'265710d5c2a79b337b6af72789193fc1c1878060';
+String _$addTodoHash() => r'35be14fdb9f239976934f94d00fe5a58266ca127';
 
 /// See also [addTodo].
 @ProviderFor(addTodo)
@@ -36,4 +36,5 @@ final todosNotifierProvider =
 );
 
 typedef _$TodosNotifier = AsyncNotifier<List<Todo>>;
-// ignore_for_file: unnecessary_raw_strings, subtype_of_sealed_class, invalid_use_of_internal_member, do_not_use_environment, prefer_const_constructors, public_member_api_docs, avoid_private_typedef_functions
+// ignore_for_file: type=lint
+// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member

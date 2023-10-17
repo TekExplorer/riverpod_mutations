@@ -6,7 +6,7 @@ part of 'generic_mutation_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$genericMutationHash() => r'2508654a692a465e37c21ccf735b98e28f2b0a53';
+String _$genericMutationHash() => r'1e9fb42fc1afe9d48fc45d44dda855c15670ec2c';
 
 /// Copied from Dart SDK
 class _SystemHash {
@@ -28,9 +28,6 @@ class _SystemHash {
     return 0x1fffffff & (hash + ((0x00003fff & hash) << 15));
   }
 }
-
-typedef GenericMutationRef
-    = AutoDisposeProviderRef<MutationState<void, Future<void> Function()>>;
 
 /// generic mutation. pass a function into [call] to execute the mutation
 /// the [mutationKey] will allow creating a new provider per context
@@ -104,10 +101,10 @@ class GenericMutationProvider
   ///
   /// Copied from [genericMutation].
   GenericMutationProvider(
-    this.mutationKey,
-  ) : super.internal(
+    Object mutationKey,
+  ) : this._internal(
           (ref) => genericMutation(
-            ref,
+            ref as GenericMutationRef,
             mutationKey,
           ),
           from: genericMutationProvider,
@@ -119,9 +116,46 @@ class GenericMutationProvider
           dependencies: GenericMutationFamily._dependencies,
           allTransitiveDependencies:
               GenericMutationFamily._allTransitiveDependencies,
+          mutationKey: mutationKey,
         );
 
+  GenericMutationProvider._internal(
+    super._createNotifier, {
+    required super.name,
+    required super.dependencies,
+    required super.allTransitiveDependencies,
+    required super.debugGetCreateSourceHash,
+    required super.from,
+    required this.mutationKey,
+  }) : super.internal();
+
   final Object mutationKey;
+
+  @override
+  Override overrideWith(
+    MutationState<void, Future<void> Function()> Function(
+            GenericMutationRef provider)
+        create,
+  ) {
+    return ProviderOverride(
+      origin: this,
+      override: GenericMutationProvider._internal(
+        (ref) => create(ref as GenericMutationRef),
+        from: from,
+        name: null,
+        dependencies: null,
+        allTransitiveDependencies: null,
+        debugGetCreateSourceHash: null,
+        mutationKey: mutationKey,
+      ),
+    );
+  }
+
+  @override
+  AutoDisposeProviderElement<MutationState<void, Future<void> Function()>>
+      createElement() {
+    return _GenericMutationProviderElement(this);
+  }
 
   @override
   bool operator ==(Object other) {
@@ -136,4 +170,19 @@ class GenericMutationProvider
     return _SystemHash.finish(hash);
   }
 }
-// ignore_for_file: unnecessary_raw_strings, subtype_of_sealed_class, invalid_use_of_internal_member, do_not_use_environment, prefer_const_constructors, public_member_api_docs, avoid_private_typedef_functions
+
+mixin GenericMutationRef
+    on AutoDisposeProviderRef<MutationState<void, Future<void> Function()>> {
+  /// The parameter `mutationKey` of this provider.
+  Object get mutationKey;
+}
+
+class _GenericMutationProviderElement extends AutoDisposeProviderElement<
+    MutationState<void, Future<void> Function()>> with GenericMutationRef {
+  _GenericMutationProviderElement(super.provider);
+
+  @override
+  Object get mutationKey => (origin as GenericMutationProvider).mutationKey;
+}
+// ignore_for_file: type=lint
+// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member
