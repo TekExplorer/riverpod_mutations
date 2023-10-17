@@ -7,6 +7,7 @@ part 'experimental_mutation.g.dart';
 
 final myNotifierProvider = MyNotifierProvider(MyNotifier.new);
 
+// Presumably this goes into the ProviderElement
 @riverpod
 MutationState<void, int> _updateInt(_UpdateIntRef ref) {
   return MutationState<void, int>.fromRef(
@@ -29,6 +30,8 @@ class MyNotifierProvider
     extends AutoDisposeAsyncNotifierProvider<MyNotifier, int> {
   MyNotifierProvider(super.createNotifier);
 
+  // Presumably this points to a ProviderElement variable
+  // I'm guessing i would need to extend the element and add the state there
   Refreshable<MutationState<void, int>> get updateInt => _updateIntProvider;
 
   @override
